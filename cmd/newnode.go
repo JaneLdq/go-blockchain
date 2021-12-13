@@ -16,13 +16,15 @@ limitations under the License.
 package cmd
 
 import (
-	"fmt"
+	nd "gobc/node"
 
+	"fmt"
+	"strconv"
 	"github.com/spf13/cobra"
 )
 
 var port uint
-var mine bool
+var miner bool
 
 // newnodeCmd represents the newnode command
 var newnodeCmd = &cobra.Command{
@@ -30,14 +32,16 @@ var newnodeCmd = &cobra.Command{
 	Short: "Create a new node with given port",
 	Long:  `Create a new node with given port`,
 	Run: func(cmd *cobra.Command, args []string) {
-		// TODO create a new node with a give port, should return an address
-		fmt.Println("newnode called with args port =", port, "mine =", mine)
+		fmt.Printf("newnode called with args (port = %d, miner = %t)\n", port, miner)
+		node := nd.NewNode(port, miner)
+		node.SaveToFile(strconv.FormatUint(uint64(node.Port), 10))
+		fmt.Printf("New node %d created with address %s\n", node.Port, node.Address)
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(newnodeCmd)
 	newnodeCmd.Flags().UintVarP(&port, "port", "p", 0, "port to run node on, which is also the node id")
-	newnodeCmd.Flags().BoolVar(&mine, "mine", false, "as a miner or not")
+	newnodeCmd.Flags().BoolVar(&miner, "miner", false, "as a miner or not")
 	newnodeCmd.MarkFlagRequired("port")
 }

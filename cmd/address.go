@@ -24,8 +24,8 @@ import (
 // addressCmd represents the address command
 var addressCmd = &cobra.Command{
 	Use:   "address",
-	Short: "Display the address of the given node",
-	Long:  `Display the address of the given node`,
+	Short: "Get the address of the given node",
+	Long:  `Get the address of the given node`,
 	Run: func(cmd *cobra.Command, args []string) {
 		// TODO query node address
 		fmt.Println("address called for node", nodeId)

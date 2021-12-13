@@ -16,7 +16,10 @@ limitations under the License.
 package cmd
 
 import (
+	nd "gobc/node"
+
 	"fmt"
+	"strconv"
 
 	"github.com/spf13/cobra"
 )
@@ -27,8 +30,15 @@ var startnodeCmd = &cobra.Command{
 	Short: "Start the node running on given port",
 	Long:  `Start the node running on given port`,
 	Run: func(cmd *cobra.Command, args []string) {
-		// TODO start the node
-		fmt.Println("startnode called on node", nodeId)
+		fmt.Printf("startnode called with args (node = %d)\n", nodeId)
+		node := nd.Node{}
+		err := node.LoadFromFile(strconv.FormatUint(uint64(nodeId), 10))
+		// TODO start node
+		if err != nil {
+			fmt.Printf("Error occurs when starting node %d\n", nodeId)
+		} else {
+			fmt.Printf("Started node %d with address %s\n", nodeId, node.Address)
+		}
 	},
 }
 
