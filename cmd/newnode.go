@@ -16,10 +16,8 @@ limitations under the License.
 package cmd
 
 import (
-	nd "gobc/node"
-
 	"fmt"
-	"strconv"
+
 	"github.com/spf13/cobra"
 )
 
@@ -33,9 +31,7 @@ var newnodeCmd = &cobra.Command{
 	Long:  `Create a new node with given port`,
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Printf("newnode called with args (port = %d, miner = %t)\n", port, miner)
-		node := nd.NewNode(port, miner)
-		node.SaveToFile(strconv.FormatUint(uint64(node.Port), 10))
-		fmt.Printf("New node %d created with address %s\n", node.Port, node.Address)
+		cli.newNode(port, miner)
 	},
 }
 

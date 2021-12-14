@@ -1,4 +1,4 @@
-package node
+package p2p
 
 import (
 	"bytes"
@@ -15,7 +15,7 @@ import (
 	"github.com/btcsuite/btcutil/base58"
 )
 
-const nodeFile = "node_%s.dat"
+const nodeFile = "node_%d.dat"
 
 type Node struct {
 	Port       uint
@@ -26,13 +26,18 @@ type Node struct {
 }
 
 func NewNode(port uint, miner bool) *Node {
+	nodeFile := fmt.Sprintf(nodeFile, port)
+	if _, err := os.Stat(nodeFile); err == nil {
+		return nil
+	}
 	private, public := generateKeyPair()
 	addr := generateAddress(public)
 	node := Node{port, addr, miner, private, public}
+	node.SaveToFile()
 	return &node
 }
 
-func (node *Node) LoadFromFile(nodeId string) error {
+func (node *Node) loadFromFile(nodeId uint) error {
 	nodeFile := fmt.Sprintf(nodeFile, nodeId)
 	if _, err := os.Stat(nodeFile); os.IsNotExist(err) {
 		return err
@@ -54,9 +59,9 @@ func (node *Node) LoadFromFile(nodeId string) error {
 	return nil
 }
 
-func (node *Node) SaveToFile(nodeId string) {
+func (node *Node) SaveToFile() {
 	var content bytes.Buffer
-	nodeFile := fmt.Sprintf(nodeFile, nodeId)
+	nodeFile := fmt.Sprintf(nodeFile, node.Port)
 
 	gob.Register(elliptic.P256())
 

@@ -29,6 +29,7 @@ var initchainCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		// TODO init blockchain on the node
 		fmt.Println("initchain called on node", nodeId)
+		cli.initChain(nodeId)
 	},
 }
 

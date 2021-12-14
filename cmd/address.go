@@ -27,8 +27,8 @@ var addressCmd = &cobra.Command{
 	Short: "Get the address of the given node",
 	Long:  `Get the address of the given node`,
 	Run: func(cmd *cobra.Command, args []string) {
-		// TODO query node address
 		fmt.Println("address called for node", nodeId)
+		cli.address(nodeId)
 	},
 }
 

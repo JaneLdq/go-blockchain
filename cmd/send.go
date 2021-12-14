@@ -33,6 +33,7 @@ var sendCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		// TODO trigger a trasaction
 		fmt.Println("send called from ", from, " to", to, "message ", msg)
+		cli.send(from, to, msg)
 	},
 }
 
