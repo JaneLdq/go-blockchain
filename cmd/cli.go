@@ -16,21 +16,22 @@ func (cli *CLI) newNode(port uint, miner bool) {
 	fmt.Printf("New node %d created with address %s\n", port, node.Address)
 }
 
+func (cli *CLI) connectNodes(from string, to string) {
+	p2p.ConnectNode(from, to)
+}
+
 func (cli *CLI) startNode(nodeId uint) {
-	err := p2p.StartNode(nodeId)
-	if err != nil {
-		fmt.Printf("Error occurs when starting node %d\n", nodeId)
-	}
+	p2p.StartNode(nodeId)
 }
 
 func (cli *CLI) initChain(nodeId uint) {
-	// TODO
+	// TODO init chain
 }
 
 func (cli *CLI) address(nodeId uint) {
-	// TODO
+	// TODO get node address
 }
 
 func (cli *CLI) send(from string, to string, message string) {
-	// TODO
+	// TODO send message from one node to another (trigger transaction)
 }

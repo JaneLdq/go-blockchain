@@ -1,9 +1,7 @@
 package p2p
 
-const CTLMSG_LEN = 12
-
 func commandToBytes(command string) []byte {
-	var bytes [CTLMSG_LEN]byte
+	var bytes [P2P_CMD_LEN]byte
 
 	for i, c := range command {
 		bytes[i] = byte(c)
