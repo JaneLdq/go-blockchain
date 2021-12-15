@@ -36,7 +36,7 @@ func NewTXOutput(value int, address string) *TXOutput {
 func NewCoinbaseTX(to string) *Transaction {
 
 	txin := TXInput{[]byte{}, -1, []byte("Genesis Block")}
-	txout := NewTXOutput(10, to)
+	txout := NewTXOutput(110, to)
 	txCoinbase := &Transaction{nil, []TXInput{txin}, []TXOutput{*txout}}
 	txCoinbase.TransactionHash()
 
