@@ -17,7 +17,7 @@ func (cli *CLI) printUsage() {
 	fmt.Println("Usage:")
 	fmt.Println("  createblockchain -address ADDRESS - Create a blockchain and send genesis block reward to ADDRESS")
 	fmt.Println("  printchain - Print all the blocks of the blockchain")
-	fmt.Println("  send -from FROM -to TO -amount AMOUNT -mine - Send AMOUNT of coins from FROM address to TO. Mine on the same node, when -mine is set.")
+	fmt.Println("  send -from FROM -to TO -amount AMOUNT - Send AMOUNT of coins from FROM address to TO address.")
 }
 
 func (cli *CLI) validateArgs() {
@@ -32,8 +32,12 @@ func (cli *CLI) Run() {
 
 	createBlockchainCmd := flag.NewFlagSet("createblockchain", flag.ExitOnError)
 	printChainCmd := flag.NewFlagSet("printchain", flag.ExitOnError)
+	sendBlockCmd := flag.NewFlagSet("send", flag.ExitOnError)
 
-	createBlockchainAddress := createBlockchainCmd.String("address", "", "The address to send genesis block reward to")
+	flagCreateBlockchainAddress := createBlockchainCmd.String("address", "", "The address to send genesis block reward to")
+	flagFrom := sendBlockCmd.String("from", "", "origin address")
+	flagTo := sendBlockCmd.String("to", "", "destination address")
+	flagAmount := sendBlockCmd.String("amount", "", "amount value")
 
 	switch os.Args[1] {
 	case "createblockchain":
@@ -46,20 +50,54 @@ func (cli *CLI) Run() {
 		if err != nil {
 			log.Panic(err)
 		}
+	case "send":
+		err := sendBlockCmd.Parse(os.Args[2:])
+		if err != nil {
+			log.Panic(err)
+		}
 
 	}
 
 	if createBlockchainCmd.Parsed() {
-		if *createBlockchainAddress == "" {
+		if *flagCreateBlockchainAddress == "" {
 			createBlockchainCmd.Usage()
 			os.Exit(1)
 		}
-		cli.createBlockchain(*createBlockchainAddress)
+		cli.createBlockchain(*flagCreateBlockchainAddress)
 	}
 
 	if printChainCmd.Parsed() {
 		cli.printChain()
 	}
+
+	if sendBlockCmd.Parsed() {
+		if *flagFrom == "" || *flagTo == "" || *flagAmount == "" {
+			printChainCmd.Usage()
+			os.Exit(1)
+		}
+
+		// fmt.Println(JSONToArray(*flagFrom))
+		// fmt.Println(JSONToArray(*flagTo))
+		// fmt.Println(JSONToArray(*flagAmount))
+
+		from := JSONToArray(*flagFrom)
+		to := JSONToArray(*flagTo)
+		amount := JSONToArray(*flagAmount)
+		cli.send(from, to, amount)
+	}
+}
+
+func (cli *CLI) send(from []string, to []string, amount []string) {
+	if !DBExists(dbFile) {
+		fmt.Println("No existing blockchain found. Create one first.")
+		os.Exit(1)
+	}
+
+	blockchain := NewBlockchainWithGenesis()
+	defer blockchain.DB.Close()
+
+	blockchain.MineNewBlock(from, to, amount)
+
 }
 
 func (cli *CLI) createBlockchain(address string) {

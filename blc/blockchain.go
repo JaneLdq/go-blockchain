@@ -42,6 +42,41 @@ func (i *BlockchainIterator) Next() *Block {
 	return block
 }
 
+func (blc *Blockchain) MineNewBlock(from []string, to []string, amount []string) {
+	// fmt.Println(from)
+	// fmt.Println(to)
+	// fmt.Println(amount)
+
+	var txs []*Transaction
+
+	var block *Block
+	blc.DB.View(func(tx *bolt.Tx) error {
+		b := tx.Bucket([]byte(blockTable))
+		if b != nil {
+			hash := b.Get([]byte("l"))
+
+			blockBytes := b.Get(hash)
+
+			block = DeserializeBlock(blockBytes)
+		}
+
+		return nil
+	})
+
+	block = NewBlock(txs, block.Header.Hash, block.Header.Height+1)
+
+	blc.DB.Update(func(tx *bolt.Tx) error {
+		b := tx.Bucket([]byte(blockTable))
+		if b != nil {
+			b.Put(block.Header.Hash, block.Serialize())
+			b.Put([]byte("l"), block.Header.Hash)
+			blc.Tip = block.Header.Hash
+		}
+		return nil
+	})
+
+}
+
 // CreateBlockchain creates a new blockchain DB
 func CreateBlockchain(address string) *Blockchain {
 
