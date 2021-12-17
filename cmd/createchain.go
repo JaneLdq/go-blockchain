@@ -21,24 +21,20 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var from string
-var to string
-var msg string
+var address string
 
-// sendCmd represents the send command
-var sendCmd = &cobra.Command{
-	Use:   "send",
-	Short: "Send a message from a node to another",
-	Long:  `Send a message from a node to another`,
+// createchainCmd represents the createchain command
+var createchainCmd = &cobra.Command{
+	Use:   "createchain",
+	Short: "Create a blockchain and send genesis block reward to address",
+	Long:  `Create a blockchain and send genesis block reward to address`,
 	Run: func(cmd *cobra.Command, args []string) {
-		// TODO trigger a trasaction
-		fmt.Println("send called from ", from, " to", to, "message ", msg)
+		fmt.Println("createChain called")
+		cli.createChain(address)
 	},
 }
 
 func init() {
-	rootCmd.AddCommand(sendCmd)
-	sendCmd.Flags().StringVarP(&from, "from", "f", "", "sender node address")
-	sendCmd.Flags().StringVarP(&to, "to", "t", "", "receiver node address")
-	sendCmd.Flags().StringVarP(&msg, "message", "m", "", "message")
+	rootCmd.AddCommand(createchainCmd)
+	createchainCmd.Flags().StringVarP(&address, "address", "a", "", "address to send genesis block reward to")
 }

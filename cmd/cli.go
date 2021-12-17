@@ -25,22 +25,24 @@ func (cli *CLI) startNode(nodeId uint) {
 	p2p.StartNode(nodeId)
 }
 
-func (cli *CLI) initChain(nodeId uint) {
-	// TODO init chain
-}
-
 func (cli *CLI) address(nodeId uint) {
-	// TODO get node address
+	fmt.Printf("Node #%d address: %s\n", nodeId, p2p.GetAddress(nodeId))
 }
 
-func (cli *CLI) send(from string, to string, message string) {
+func (cli *CLI) send(from string, to string, amount string) {
+	// TODO send coins from an address to another
+}
+
+func (cli *CLI) sendmsg(from string, to string, message string) {
 	// TODO send message from one node to another (trigger transaction)
 }
 
-func (cli *CLI) createBlockchain(address string) {
-
+func (cli *CLI) createChain(address string) {
 	bc := blc.CreateBlockchain(address)
 	defer bc.DB.Close()
-
 	fmt.Println("Done!")
+}
+
+func (cli *CLI) printChain(nodeId uint) {
+	blc.PrintChain(nodeId)
 }

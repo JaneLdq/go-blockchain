@@ -8,8 +8,8 @@ import (
 	"crypto/sha256"
 	"fmt"
 	"log"
-	"os"
 	"net"
+	"os"
 
 	"github.com/btcsuite/btcutil"
 	"github.com/btcsuite/btcutil/base58"
@@ -61,6 +61,15 @@ func StartNode(nodeId uint) {
 	}
 }
 
+func GetAddress(nodeId uint) string {
+	node := Node{}
+	err := node.loadFromFile(nodeId)
+	if err != nil {
+		log.Fatalln(fmt.Sprintf("Node %d not found.", nodeId))
+	}
+	return node.Address
+}
+
 func ConnectNode(addrFrom string, addrTo string) {
 	sendConnect(addrFrom, addrTo)
 }
@@ -88,11 +97,11 @@ func generateKeyPair() (ecdsa.PrivateKey, []byte) {
 }
 
 /**
- * 	The process to generate address: 
+ * 	The process to generate address:
  *  1. pubKeyHash = ripemd160(sha256(pubKey)
  *  2. checksum = sha256(sha256(0x00 + pubKeyHash))
  *  3. address = base58(0x00 + pubKeyHash + checksum)
-*/
+ */
 func generateAddress(pubKey []byte) string {
 	pubKeyHash := btcutil.Hash160(pubKey)
 	versionedPayload := append([]byte{ADDR_TYPE}, pubKeyHash...)
@@ -101,7 +110,7 @@ func generateAddress(pubKey []byte) string {
 	return base58.Encode(fullPayload)
 }
 
-func checksum(payload []byte) []byte{
+func checksum(payload []byte) []byte {
 	firstSHA := sha256.Sum256(payload)
 	secondSHA := sha256.Sum256(firstSHA[:])
 	return secondSHA[:ADDR_CHECKSUM_LEN]

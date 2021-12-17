@@ -21,24 +21,18 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var from string
-var to string
-var msg string
-
-// sendCmd represents the send command
-var sendCmd = &cobra.Command{
-	Use:   "send",
-	Short: "Send a message from a node to another",
-	Long:  `Send a message from a node to another`,
+// printchainCmd represents the printChain command
+var printchainCmd = &cobra.Command{
+	Use:   "printchain",
+	Short: "Print all the blocks of the blockchain",
+	Long:  `Print all the blocks of the blockchain`,
 	Run: func(cmd *cobra.Command, args []string) {
-		// TODO trigger a trasaction
-		fmt.Println("send called from ", from, " to", to, "message ", msg)
+		fmt.Println("printChain called")
+		cli.printChain(nodeId)
 	},
 }
 
 func init() {
-	rootCmd.AddCommand(sendCmd)
-	sendCmd.Flags().StringVarP(&from, "from", "f", "", "sender node address")
-	sendCmd.Flags().StringVarP(&to, "to", "t", "", "receiver node address")
-	sendCmd.Flags().StringVarP(&msg, "message", "m", "", "message")
+	rootCmd.AddCommand(printchainCmd)
+	printchainCmd.Flags().UintVarP(&nodeId, "node", "n", 0, "node id")
 }

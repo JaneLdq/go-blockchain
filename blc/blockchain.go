@@ -4,12 +4,15 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strconv"
+	"time"
 
 	"github.com/boltdb/bolt"
 )
 
 const dbFile = "blockchain_db"
 const blockTable = "blocks"
+const timeFormat string = "2006-01-02 03:04:05 PM"
 
 type Blockchain struct {
 	Tip []byte
@@ -165,4 +168,48 @@ func DBExists(dbFile string) bool {
 	}
 
 	return true
+}
+
+// print blockchain on one node
+func PrintChain(nodeId uint) {
+	bc := NewBlockchainWithGenesis()
+	defer bc.DB.Close()
+
+	bci := bc.Iterator()
+
+	for {
+		block := bci.Next()
+
+		fmt.Printf("Block: %x\n", block.Header.Hash)
+		fmt.Printf("Height: %d\n", block.Header.Height)
+		fmt.Printf("Nonce: %d\n", block.Header.Nonce)
+		fmt.Printf("PrevBlock: %x\n", block.Header.PrevBlockHash)
+		pow := NewPoW(block)
+		fmt.Printf("PoW: %s\n", strconv.FormatBool(pow.Validate()))
+		fmt.Println("Txs: ")
+		for _, tx := range block.Txs {
+			// fmt.Println(tx)
+			fmt.Printf("%x\n", tx.TxHash)
+			fmt.Printf("Vins: \n")
+			for _, in := range tx.Vins {
+				// fmt.Println(in)
+				fmt.Printf("in.Txid: %x\n", in.Txid)
+				fmt.Printf("n.Vout: %d\n", in.Vout)
+				fmt.Printf("in.PubKey: %s\n", in.PubKey)
+			}
+			fmt.Printf("Vouts: \n")
+			for _, out := range tx.Vouts {
+				// fmt.Println(out)
+				fmt.Println(out.Value)
+				fmt.Println(out.PubKeyHash)
+			}
+		}
+		fmt.Printf("Timestamp: %s\n", time.Unix(block.Header.Timestamp, 0).Format(timeFormat))
+		fmt.Printf("---------------------------------------------------------------------")
+		fmt.Printf("\n\n")
+
+		if len(block.Header.PrevBlockHash) == 0 {
+			break
+		}
+	}
 }

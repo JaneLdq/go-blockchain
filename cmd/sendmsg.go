@@ -21,20 +21,21 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// initchainCmd represents the initchain command
-var initchainCmd = &cobra.Command{
-	Use:   "initchain",
-	Short: "Init the blockchain on given node",
-	Long:  `Init the blockchain on given node`,
+// sendmsgCmd represents the sendmsg command
+var sendmsgCmd = &cobra.Command{
+	Use:   "sendmsg",
+	Short: "Send a message from a node to another",
+	Long:  `Send a message from a node to another`,
 	Run: func(cmd *cobra.Command, args []string) {
-		// TODO init blockchain on the node
-		fmt.Println("initchain called on node", nodeId)
-		cli.initChain(nodeId)
+		// TODO trigger a trasaction
+		fmt.Println("sendmsg called from ", from, " to", to, "message ", msg)
+		cli.sendmsg(from, to, msg)
 	},
 }
 
 func init() {
-	rootCmd.AddCommand(initchainCmd)
-	initchainCmd.Flags().UintVarP(&nodeId, "node", "n", 0, "node id, idenfical to the port which the node runs on")
-	initchainCmd.MarkFlagRequired("node")
+	rootCmd.AddCommand(sendmsgCmd)
+	sendmsgCmd.Flags().StringVarP(&from, "from", "f", "", "sender node address")
+	sendmsgCmd.Flags().StringVarP(&to, "to", "t", "", "receiver node address")
+	sendmsgCmd.Flags().StringVarP(&msg, "message", "m", "", "message")
 }
