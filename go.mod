@@ -1,8 +1,9 @@
-module gobc
+module go-blockchain
 
 go 1.17
 
 require (
+	github.com/boltdb/bolt v1.3.1
 	github.com/btcsuite/btcutil v1.0.3-0.20201208143702-a53e38424cce
 	github.com/spf13/cobra v1.2.1
 	github.com/spf13/viper v1.8.1

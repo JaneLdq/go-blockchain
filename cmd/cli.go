@@ -2,7 +2,8 @@ package cmd
 
 import (
 	"fmt"
-	p2p "gobc/p2p"
+	blc "go-blockchain/blc"
+	p2p "go-blockchain/p2p"
 )
 
 type CLI struct{}
@@ -34,4 +35,12 @@ func (cli *CLI) address(nodeId uint) {
 
 func (cli *CLI) send(from string, to string, message string) {
 	// TODO send message from one node to another (trigger transaction)
+}
+
+func (cli *CLI) createBlockchain(address string) {
+
+	bc := blc.CreateBlockchain(address)
+	defer bc.DB.Close()
+
+	fmt.Println("Done!")
 }

@@ -15,7 +15,7 @@ limitations under the License.
 */
 package main
 
-import "gobc/cmd"
+import "go-blockchain/cmd"
 
 func main() {
 	cmd.Execute()
