@@ -9,5 +9,4 @@ const (
 	P2P_CMD_LEN = 12
 
 	PROTOCOL = "tcp"
-	GENESIS_NODE = "localhost:2021"
 )

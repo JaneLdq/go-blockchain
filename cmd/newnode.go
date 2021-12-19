@@ -22,7 +22,6 @@ import (
 )
 
 var port uint
-var miner bool
 
 // newnodeCmd represents the newnode command
 var newnodeCmd = &cobra.Command{
@@ -30,14 +29,13 @@ var newnodeCmd = &cobra.Command{
 	Short: "Create a new node with given port",
 	Long:  `Create a new node with given port`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Printf("newnode called with args (port = %d, miner = %t)\n", port, miner)
-		cli.newNode(port, miner)
+		fmt.Printf("newnode called with args (port = %d)\n", port)
+		cli.newNode(port)
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(newnodeCmd)
 	newnodeCmd.Flags().UintVarP(&port, "port", "p", 0, "port to run node on, which is also the node id")
-	newnodeCmd.Flags().BoolVar(&miner, "miner", false, "as a miner or not")
 	newnodeCmd.MarkFlagRequired("port")
 }

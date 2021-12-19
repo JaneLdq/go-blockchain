@@ -8,82 +8,67 @@ import (
 	"crypto/sha256"
 	"fmt"
 	"log"
-	"net"
-	"os"
 
 	"github.com/btcsuite/btcutil"
 	"github.com/btcsuite/btcutil/base58"
 )
 
-var knownNodes = []string{
-	GENESIS_NODE,
-}
+var nodeIPAddress string
+var node Node
 
-var nodeAddress string
+// TODO 
+var blocks []string
 
 type Node struct {
 	Port       uint
 	Address    string
-	Miner      bool
 	PrivateKey ecdsa.PrivateKey
 	Publickey  []byte
+	peers      []string
 }
 
-func StartNode(nodeId uint) {
-	node := Node{}
-	err := node.loadFromFile(nodeId)
-	if err != nil {
-		log.Fatalln(fmt.Sprintf("Node %d not found.", nodeId))
-	}
-
-	nodeAddress = fmt.Sprintf("localhost:%d", nodeId)
-	ln, err := net.Listen(PROTOCOL, nodeAddress)
-	if err != nil {
-		log.Fatal(fmt.Sprintf("Node %d failed to start.", nodeId))
-	}
-	defer ln.Close()
-
-	// TODO init block chain from db
-	// bc := NewBlockchain(nodeID)
-
-	// register in genesis node
-	if nodeAddress != GENESIS_NODE {
-		sendHello(GENESIS_NODE)
-		// TODO update chain
-	}
-
-	for {
-		conn, err := ln.Accept()
-		if err != nil {
-			log.Panic(err)
+func (node *Node) isBlockExisted(newBlock string) bool {
+	for _, block := range blocks {
+		if block == newBlock {
+			return true
 		}
-		go handleConn(conn)
+	}
+	return false
+}
+
+func (node *Node) broadcast(from string, payload []byte) {
+	request := append(commandToBytes("update"), payload...)
+	for _, peer := range node.peers {
+		if peer != nodeIPAddress && peer != from {
+			fmt.Printf("[NODE] Broadcast to %s\n", peer)
+			err := sendData(peer, request)
+			if err != nil {
+				node.removePeer(peer)
+			}
+		}
 	}
 }
 
-func GetAddress(nodeId uint) string {
-	node := Node{}
-	err := node.loadFromFile(nodeId)
-	if err != nil {
-		log.Fatalln(fmt.Sprintf("Node %d not found.", nodeId))
+func (node *Node) addPeer(newPeer string) {
+	for _, peer := range node.peers {
+		if (peer == newPeer) {
+			return
+		}
 	}
-	return node.Address
+	node.peers = append(node.peers, newPeer)
+	fmt.Printf("New peer added: %s\n", newPeer)
 }
 
-func ConnectNode(addrFrom string, addrTo string) {
-	sendConnect(addrFrom, addrTo)
-}
-
-func NewNode(port uint, miner bool) *Node {
-	nodeFile := buildNodeFilePath(port)
-	if _, err := os.Stat(nodeFile); err == nil {
-		return nil
+func (node *Node) removePeer(lostPeer string) {
+	var peerIdx int
+	for idx, peer := range node.peers {
+		if (peer == lostPeer) {
+			peerIdx = idx
+			break
+		}
 	}
-	private, public := generateKeyPair()
-	addr := generateAddress(public)
-	node := Node{port, addr, miner, private, public}
-	node.saveToFile()
-	return &node
+	node.peers = append(node.peers[0:peerIdx], node.peers[peerIdx+1:]...)
+	fmt.Printf("Peer removed: %s\n", lostPeer)
 }
 
 func generateKeyPair() (ecdsa.PrivateKey, []byte) {
@@ -114,31 +99,6 @@ func checksum(payload []byte) []byte {
 	firstSHA := sha256.Sum256(payload)
 	secondSHA := sha256.Sum256(firstSHA[:])
 	return secondSHA[:ADDR_CHECKSUM_LEN]
-}
-
-func nodeIsKnown(addr string) bool {
-	for _, node := range knownNodes {
-		if node == addr {
-			return true
-		}
-	}
-	return false
-}
-
-func addKnownNode(addr string) {
-	if !nodeIsKnown(addr) {
-		knownNodes = append(knownNodes, addr)
-	}
-}
-
-func removeNAKnownNode(addr string) {
-	var updatedNodes []string
-	for _, node := range knownNodes {
-		if node != addr {
-			updatedNodes = append(updatedNodes, node)
-		}
-	}
-	knownNodes = updatedNodes
 }
 
 func ValidateNodeAddress(address string) bool {

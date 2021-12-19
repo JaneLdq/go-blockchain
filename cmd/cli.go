@@ -8,13 +8,16 @@ import (
 
 type CLI struct{}
 
-func (cli *CLI) newNode(port uint, miner bool) {
-	node := p2p.NewNode(port, miner)
+func (cli *CLI) newNode(port uint) {
+	node := p2p.NewNode(port)
 	if node == nil {
 		fmt.Printf("Node running on port %d existed, please choose another port.\n", port)
 		return
 	}
 	fmt.Printf("New node %d created with address %s\n", port, node.Address)
+	bc := blc.CreateBlockchain(node.Address)
+	defer bc.DB.Close()
+	fmt.Printf("New blockchain initialized on node %d!\n", port)
 }
 
 func (cli *CLI) connectNodes(from string, to string) {
@@ -33,8 +36,8 @@ func (cli *CLI) send(from string, to string, amount string) {
 	// TODO send coins from an address to another
 }
 
-func (cli *CLI) sendmsg(from string, to string, message string) {
-	// TODO send message from one node to another (trigger transaction)
+func (cli *CLI) mine(nodeAddr string) {
+	p2p.Mine(nodeAddr)
 }
 
 func (cli *CLI) createChain(address string) {
