@@ -45,8 +45,8 @@ func sendData(addr string, data []byte) error {
 	return nil
 }
 
-func getPayload(request []byte) bytes.Buffer {
+func getPayload(request []byte) []byte {
 	var buff bytes.Buffer
 	buff.Write(request[P2P_CMD_LEN:])
-	return buff
+	return buff.Bytes()
 }

@@ -21,19 +21,19 @@ import (
 	"github.com/spf13/cobra"
 )
 
-// startnodeCmd represents the startnode command
-var startnodeCmd = &cobra.Command{
-	Use:   "startnode",
+// startCmd represents the start command
+var startCmd = &cobra.Command{
+	Use:   "start",
 	Short: "Start the node running on given port",
 	Long:  `Start the node running on given port`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Printf("startnode called with args (node = %d)\n", nodeId)
+		fmt.Printf("start called with args (node = %d)\n", nodeId)
 		cli.startNode(nodeId)
 	},
 }
 
 func init() {
-	rootCmd.AddCommand(startnodeCmd)
-	startnodeCmd.Flags().UintVarP(&nodeId, "node", "n", 0, "node id, idenfical to the port which the node runs on")
-	startnodeCmd.MarkFlagRequired("node")
+	rootCmd.AddCommand(startCmd)
+	startCmd.Flags().UintVarP(&nodeId, "node", "n", 0, "node id, idenfical to the port which the node runs on")
+	startCmd.MarkFlagRequired("node")
 }

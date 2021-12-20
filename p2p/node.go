@@ -13,62 +13,47 @@ import (
 	"github.com/btcsuite/btcutil/base58"
 )
 
-var nodeIPAddress string
-var node Node
-
-// TODO 
-var blocks []string
-
 type Node struct {
 	Port       uint
-	Address    string
+	Address    string // base58 address
 	PrivateKey ecdsa.PrivateKey
 	Publickey  []byte
-	peers      []string
+	peers      []string // known peers
+	Height     uint     // current chain height
 }
 
-func (node *Node) isBlockExisted(newBlock string) bool {
+// TODO just for test
+var blocks []string
+
+func (node *Node) isBlockExisted(newBlock []byte) bool {
 	for _, block := range blocks {
-		if block == newBlock {
+		if block == string(newBlock) {
 			return true
 		}
 	}
 	return false
 }
 
-func (node *Node) broadcast(from string, payload []byte) {
-	request := append(commandToBytes("update"), payload...)
-	for _, peer := range node.peers {
-		if peer != nodeIPAddress && peer != from {
-			fmt.Printf("[NODE] Broadcast to %s\n", peer)
-			err := sendData(peer, request)
-			if err != nil {
-				node.removePeer(peer)
-			}
-		}
-	}
-}
-
 func (node *Node) addPeer(newPeer string) {
 	for _, peer := range node.peers {
-		if (peer == newPeer) {
+		if peer == newPeer {
 			return
 		}
 	}
 	node.peers = append(node.peers, newPeer)
-	fmt.Printf("New peer added: %s\n", newPeer)
+	fmt.Printf("[NODE] New peer added: %s\n", newPeer)
 }
 
 func (node *Node) removePeer(lostPeer string) {
 	var peerIdx int
 	for idx, peer := range node.peers {
-		if (peer == lostPeer) {
+		if peer == lostPeer {
 			peerIdx = idx
 			break
 		}
 	}
 	node.peers = append(node.peers[0:peerIdx], node.peers[peerIdx+1:]...)
-	fmt.Printf("Peer removed: %s\n", lostPeer)
+	fmt.Printf("[NODE] Peer removed: %s\n", lostPeer)
 }
 
 func generateKeyPair() (ecdsa.PrivateKey, []byte) {
