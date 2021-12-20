@@ -13,10 +13,30 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-package main
+package cmd
 
-import "go-blockchain/cmd"
+import (
+	"fmt"
+	"go-blockchain/p2p"
 
-func main() {
-	cmd.Execute()
+	"github.com/spf13/cobra"
+)
+
+var nodeAddr string
+
+// mineCmd represents the mine command
+var mineCmd = &cobra.Command{
+	Use:   "mine",
+	Short: "start mining at the given node",
+	Long: `startt mining at the given node`,
+	Run: func(cmd *cobra.Command, args []string) {
+		fmt.Printf("mine called with args (address = %s)\n", nodeAddr)
+		p2p.Mine(nodeAddr)
+	},
+}
+
+func init() {
+	rootCmd.AddCommand(mineCmd)
+	mineCmd.Flags().StringVarP(&nodeAddr, "address", "a", "", "IP address of the node")
+	mineCmd.MarkFlagRequired("address")
 }

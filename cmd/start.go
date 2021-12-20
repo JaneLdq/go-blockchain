@@ -13,10 +13,27 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-package main
+package cmd
 
-import "go-blockchain/cmd"
+import (
+	"fmt"
 
-func main() {
-	cmd.Execute()
+	"github.com/spf13/cobra"
+)
+
+// startCmd represents the start command
+var startCmd = &cobra.Command{
+	Use:   "start",
+	Short: "Start the node running on given port",
+	Long:  `Start the node running on given port`,
+	Run: func(cmd *cobra.Command, args []string) {
+		fmt.Printf("start called with args (node = %d)\n", nodeId)
+		cli.startNode(nodeId)
+	},
+}
+
+func init() {
+	rootCmd.AddCommand(startCmd)
+	startCmd.Flags().UintVarP(&nodeId, "node", "n", 0, "node id, idenfical to the port which the node runs on")
+	startCmd.MarkFlagRequired("node")
 }

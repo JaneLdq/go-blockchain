@@ -13,10 +13,26 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 */
-package main
+package cmd
 
-import "go-blockchain/cmd"
+import (
+	"fmt"
 
-func main() {
-	cmd.Execute()
+	"github.com/spf13/cobra"
+)
+
+// printchainCmd represents the printChain command
+var printchainCmd = &cobra.Command{
+	Use:   "printchain",
+	Short: "Print all the blocks of the blockchain",
+	Long:  `Print all the blocks of the blockchain`,
+	Run: func(cmd *cobra.Command, args []string) {
+		fmt.Println("printChain called")
+		cli.printChain(nodeId)
+	},
+}
+
+func init() {
+	rootCmd.AddCommand(printchainCmd)
+	printchainCmd.Flags().UintVarP(&nodeId, "node", "n", 0, "node id")
 }
