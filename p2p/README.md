@@ -1,6 +1,7 @@
 # P2P
 
 main files:
+* `cmd.go` - define an enum `CMD` use type `uint8` as command in a connection payload
 * `api.go` - define public functions called by CLI
 * `node.go` - define struct `Node` and functions to generate key pairs and node address (base58 address for trading transaction)
 * `handler.go` - define handlers for http requests
