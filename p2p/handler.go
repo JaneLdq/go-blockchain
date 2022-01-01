@@ -30,6 +30,8 @@ func handleConn(conn net.Conn) {
 		node.handleNewBlock(request)
 	case "reqchain":
 		node.handleReqChain(request)
+	case "updatechain":
+		node.handleUpdateChain(request)
 	default:
 		log.Fatalln("Unknown command!")
 	}
@@ -67,19 +69,19 @@ func (node *Node) handleConnect(request []byte) {
 
 func (node *Node) handleHello(request []byte) {
 	payload := getPayload(request)
+	fmt.Printf(logTemp, "hello", payload)
+
 	msg := HelloMessage{}
 	json.Unmarshal(payload, &msg)
-
-	fmt.Printf(logTemp, "hello", payload)
 
 	node.addPeer(msg.From)
 
 	if msg.Height > node.Height {
-		// TODO if local blockchain is shorter, request blockchain from the new peer and broadcast to other known peers
-		fmt.Println("[HANDLER] TODO Local blockchain is outdated, request longer blockchain from the new peer")
+		// if local blockchain is shorter, request blockchain from the new peer and broadcast to other known peers
+		sendData(msg.From, append(commandToBytes("reqchain"), []byte(nodeIPAddress)...))
 	} else if msg.Height < node.Height {
-		// TODO if local blockchain is longer, send local blockchain to the new peer
-		fmt.Println("[HANDLER] TODO Local blockchain is ahead of the peer's, send local blockchain to it")
+		// if local blockchain is longer, send local blockchain to the new peer
+		node.sendChain(msg.From)
 	}
 }
 
@@ -97,7 +99,6 @@ func (node *Node) handleMine() {
 
 func (node *Node) handleNewBlock(request []byte) {
 	payload := getPayload(request)
-
 	fmt.Printf(logTemp, "newblock", payload)
 
 	msg := BroadcastMessage{}
@@ -116,5 +117,19 @@ func (node *Node) handleNewBlock(request []byte) {
 }
 
 func (node *Node) handleReqChain(request []byte) {
-	// TODO hanlde request blockchain
+	payload := getPayload(request)
+	fmt.Printf(logTemp, "reqchain", payload)
+	peer := string(payload)
+	node.sendChain(peer)
+}
+
+func (node *Node) handleUpdateChain(request []byte) {
+	payload := getPayload(request)
+	fmt.Printf(logTemp, "updatechain", payload)
+	// TODO update chain
+}
+
+func (node *Node) sendChain(destination string) {
+	// TODO get chain from database
+	sendData(destination, append(commandToBytes("updatechain"), "this is latest chain"...))
 }
