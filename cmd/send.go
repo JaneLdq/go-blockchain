@@ -31,7 +31,8 @@ var sendCmd = &cobra.Command{
 	Short: "Send a message from a node to another",
 	Long:  `Send a message from a node to another`,
 	Run: func(cmd *cobra.Command, args []string) {
-		// TODO trigger a trasaction
+		//trigger a trasaction
+		cli.send(from, to, msg, nodeId)
 		fmt.Println("send called from ", from, " to", to, "message ", msg)
 	},
 }
