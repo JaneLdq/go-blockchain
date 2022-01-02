@@ -36,7 +36,7 @@ func NewBlock(txs []*Transaction, prevBlockHash []byte, height int) *Block {
 
 // NewGenesisBlock creates and returns genesis Block
 func NewGenesisBlock(coinbase *Transaction) *Block {
-	return NewBlock([]*Transaction{coinbase}, []byte{}, 0)
+	return NewBlock([]*Transaction{coinbase}, []byte{}, 1)
 }
 
 // serializes the block
