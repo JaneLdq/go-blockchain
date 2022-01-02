@@ -76,12 +76,11 @@ func GetAddress(nodeId uint) string {
 
 // from and to are both IP address, e.g, localhost:3000
 func ConnectNode(from string, to string) {
-	request := append(commandToBytes("connect"), to...)
+	request := append(CONNECT.ToByteArray(), to...)
 	sendData(from, request)
 }
 
 // nodeAddr is the IP address
 func Mine(nodeAddr string) {
-	request := commandToBytes("mine")
-	sendData(nodeAddr, request)
+	sendData(nodeAddr, MINE.ToByteArray())
 }

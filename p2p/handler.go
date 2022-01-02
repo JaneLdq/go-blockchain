@@ -18,18 +18,20 @@ func handleConn(conn net.Conn) {
 	if err != nil {
 		log.Panic(err)
 	}
-	command := bytesToCommand(request[:P2P_CMD_LEN])
+	command := CMD(request[0])
 	switch command {
-	case "connect":
+	case CONNECT:
 		node.handleConnect(request)
-	case "hello":
+	case HELLO:
 		node.handleHello(request)
-	case "mine":
+	case MINE:
 		node.handleMine()
-	case "newblock":
+	case NEW_BLOCK:
 		node.handleNewBlock(request)
-	case "reqchain":
+	case REQ_CHAIN:
 		node.handleReqChain(request)
+	case UPDATE_CHAIN:
+		node.handleUpdateChain(request)
 	default:
 		log.Fatalln("Unknown command!")
 	}
@@ -37,29 +39,29 @@ func handleConn(conn net.Conn) {
 }
 
 type HelloMessage struct {
-	From             string
-	Address          string
-	Height           uint
-	LastestBlockHash string
+	From          string
+	Address       string
+	Height        uint
+	LastBlockHash string
 }
 
 func (node *Node) handleConnect(request []byte) {
 	payload := getPayload(request)
 	newPeer := string(payload)
 
-	fmt.Printf(logTemp, "connect", newPeer)
+	fmt.Printf(logTemp, CONNECT.String(), newPeer)
 
 	msg := HelloMessage{
-		From:             nodeIPAddress,
-		Address:          node.Address,
-		Height:           node.Height,
-		LastestBlockHash: "",
+		From:          nodeIPAddress,
+		Address:       node.Address,
+		Height:        node.Height,
+		LastBlockHash: "",
 	}
 
 	data, _ := json.Marshal(msg)
 
 	// when connect to a peer, the calling node should sync its blockchain with the other node
-	err := sendData(newPeer, append(commandToBytes("hello"), data...))
+	err := sendData(newPeer, append(HELLO.ToByteArray(), data...))
 	if err == nil {
 		node.addPeer(newPeer)
 	}
@@ -67,24 +69,24 @@ func (node *Node) handleConnect(request []byte) {
 
 func (node *Node) handleHello(request []byte) {
 	payload := getPayload(request)
+	fmt.Printf(logTemp, HELLO.String(), payload)
+
 	msg := HelloMessage{}
 	json.Unmarshal(payload, &msg)
-
-	fmt.Printf(logTemp, "hello", payload)
 
 	node.addPeer(msg.From)
 
 	if msg.Height > node.Height {
-		// TODO if local blockchain is shorter, request blockchain from the new peer and broadcast to other known peers
-		fmt.Println("[HANDLER] TODO Local blockchain is outdated, request longer blockchain from the new peer")
+		// if local blockchain is shorter, request blockchain from the new peer and broadcast to other known peers
+		sendData(msg.From, append(REQ_CHAIN.ToByteArray(), []byte(nodeIPAddress)...))
 	} else if msg.Height < node.Height {
-		// TODO if local blockchain is longer, send local blockchain to the new peer
-		fmt.Println("[HANDLER] TODO Local blockchain is ahead of the peer's, send local blockchain to it")
+		// if local blockchain is longer, send local blockchain to the new peer
+		node.sendChain(msg.From)
 	}
 }
 
 func (node *Node) handleMine() {
-	fmt.Printf(logTemp, "mine", "")
+	fmt.Printf(logTemp, MINE.String(), "")
 
 	// TODO mining
 	s1 := rand.NewSource(time.Now().UnixNano())
@@ -97,8 +99,7 @@ func (node *Node) handleMine() {
 
 func (node *Node) handleNewBlock(request []byte) {
 	payload := getPayload(request)
-
-	fmt.Printf(logTemp, "newblock", payload)
+	fmt.Printf(logTemp, NEW_BLOCK.String(), payload)
 
 	msg := BroadcastMessage{}
 	json.Unmarshal(payload, &msg)
@@ -116,5 +117,57 @@ func (node *Node) handleNewBlock(request []byte) {
 }
 
 func (node *Node) handleReqChain(request []byte) {
-	// TODO hanlde request blockchain
+	payload := getPayload(request)
+	fmt.Printf(logTemp, REQ_CHAIN.String(), payload)
+	peer := string(payload)
+	node.sendChain(peer)
+}
+
+type BlockchainPayload struct {
+	Height        uint
+	Blocks        []byte
+	LastBlockHash string
+}
+
+func (node *Node) handleUpdateChain(request []byte) {
+	payload := getPayload(request)
+	fmt.Printf(logTemp, UPDATE_CHAIN.String(), payload)
+
+	msg := BroadcastMessage{}
+	json.Unmarshal(payload, &msg)
+
+	chain := BlockchainPayload{}
+	json.Unmarshal(msg.Content, &chain)
+
+	if chain.Height > node.Height {
+		node.Height = chain.Height
+		fmt.Printf("[HANDLER] Updated chain height: %d\n", node.Height)
+		// TODO replace local chain with received chain
+		node.broadcastChain(msg.From, []byte(msg.Content))
+	} else {
+		fmt.Printf("[HANDLER] Outdated chain, ignored")
+	}
+}
+
+func (node *Node) sendChain(destination string) {
+	// TODO build chain from somewhere
+	chain := &BlockchainPayload{
+		Height: node.Height,
+		Blocks: []byte{},
+	}
+	content, err := json.Marshal(chain)
+	if err != nil {
+		log.Panic(err)
+	}
+
+	msg := &BroadcastMessage{
+		Type:    CHAIN,
+		Content: content,
+		From:    nodeIPAddress,
+	}
+	payload, err := json.Marshal(msg)
+	if err != nil {
+		log.Panic(err)
+	}
+	sendData(destination, append(UPDATE_CHAIN.ToByteArray(), payload...))
 }

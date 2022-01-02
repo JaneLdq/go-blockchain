@@ -14,7 +14,7 @@ Here is a sample output, it is not a stable version, we're still woking on it.
 ```
 Gobc is a simplified blockchain implemented in Go
 
-Usage:        
+Usage:
   gobc [flags]
   gobc [command]
 
@@ -27,7 +27,7 @@ Available Commands:
   newnode     Create a new node with given port
   printchain  Print all the blocks of the blockchain
   send        Send a message from a node to another
-  startnode   Start the node running on given port
+  start       Start the node running on given port
 
 Flags:
       --config string   config file (default is $HOME/.gobc.yaml)
