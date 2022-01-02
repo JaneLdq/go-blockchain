@@ -15,7 +15,7 @@ func (cli *CLI) newNode(port uint) {
 		return
 	}
 	fmt.Printf("New node %d created with address %s\n", port, node.Address)
-	bc := blc.CreateBlockchain(node.Address, nodeId)
+	bc := blc.CreateBlockchain(node.Address, port)
 	defer bc.DB.Close()
 	fmt.Printf("New blockchain initialized on node %d!\n", port)
 }
@@ -33,21 +33,14 @@ func (cli *CLI) address(nodeId uint) {
 }
 
 func (cli *CLI) send(from string, to string, amount string, nodeId uint) {
-	// TODO send coins from an address to another
 	bc := blc.NewBlockchainWithGenesis(nodeId)
 	defer bc.DB.Close()
 
 	bc.MineNewBlock(from, to, amount)
 }
 
-func (cli *CLI) mine(nodeAddr string) {
-	p2p.Mine(nodeAddr)
-}
-
-func (cli *CLI) createChain(nodeAddr string, nodeId uint) {
-	bc := blc.CreateBlockchain(address, nodeId)
-	defer bc.DB.Close()
-	fmt.Println("Done!")
+func (cli *CLI) mine(nodeIpAddr string, from string, to string, amount string) {
+	p2p.Mine(nodeIpAddr, from, to, amount)
 }
 
 func (cli *CLI) printChain(nodeId uint) {
