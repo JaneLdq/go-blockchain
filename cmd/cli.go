@@ -33,15 +33,8 @@ func (cli *CLI) address(nodeId uint) {
 }
 
 func (cli *CLI) send(from string, to string, amount string, address string, nodeId uint) {
-	bc := blc.NewBlockchainWithGenesis(nodeId)
-	defer bc.DB.Close()
-
-	bc.MineNewBlock(from, to, amount, address)
+	p2p.Mine(from, to, amount, address, nodeId)
 }
-
-// func (cli *CLI) mine(nodeIpAddr string, from string, to string, amount string) {
-// 	p2p.Mine(nodeIpAddr, from, to, amount)
-// }
 
 func (cli *CLI) printChain(nodeId uint) {
 	blc.PrintChain(nodeId)

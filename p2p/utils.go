@@ -29,3 +29,7 @@ func getPayload(request []byte) []byte {
 	buff.Write(request[CMD_LENGTH:])
 	return buff.Bytes()
 }
+
+func buildNodeIPAddress(nodeId uint) string {
+	return fmt.Sprintf("localhost:%d", nodeId)
+}
