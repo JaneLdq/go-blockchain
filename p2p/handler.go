@@ -40,7 +40,6 @@ type HelloMessage struct {
 	From          string
 	Address       string
 	Height        int
-	LastBlockHash string
 }
 
 func (node *Node) handleConnect(request []byte) {
@@ -53,7 +52,6 @@ func (node *Node) handleConnect(request []byte) {
 		From:          nodeIPAddress,
 		Address:       node.Address,
 		Height:        node.getHeight(),
-		LastBlockHash: "",
 	}
 
 	data, _ := json.Marshal(msg)

@@ -22,12 +22,13 @@ func StartNode(nodeId uint) {
 	if err != nil {
 		log.Fatalln(fmt.Sprintf("Node %d not found.", nodeId))
 	}
-	fmt.Printf("[API] start node %d, whose blockchain height is %d\n", nodeId, node.getHeight())
+	nodeIPAddress = buildNodeIPAddress(nodeId)
+	fmt.Printf("[API] start node %d listening at %s, current blockchain height: %d\n", nodeId, nodeIPAddress, node.getHeight())
 
-	nodeIPAddress = fmt.Sprintf("localhost:%d", nodeId)
 	ln, err := net.Listen(PROTOCOL, nodeIPAddress)
 	if err != nil {
-		log.Fatalln(fmt.Sprintf("Node %d failed to start.", nodeId))
+		log.Println(fmt.Sprintf("Node %d failed to start.", nodeId))
+		log.Fatalln(err)
 	}
 	defer ln.Close()
 
@@ -75,20 +76,23 @@ func ConnectNode(from string, to string) {
 }
 
 type SendMessage struct {
-	From   string
-	To     string
-	Amount string
+	From    string
+	To      string
+	Amount  string
+	Address string
 }
 
-func Mine(nodeIpAddr string, from string, to string, amount string) {
+func Mine(from string, to string, amount string, address string, nodeId uint) {
 	msg := &SendMessage{
-		From:   from,
-		To:     to,
-		Amount: amount,
+		From:    from,
+		To:      to,
+		Amount:  amount,
+		Address: address,
 	}
 	payload, err := json.Marshal(msg)
 	if err != nil {
 		log.Fatal(err)
 	}
-	sendData(nodeIpAddr, append(MINE.ToByteArray(), payload...))
+	nodeIPAddress := buildNodeIPAddress(nodeId)
+	sendData(nodeIPAddress, append(MINE.ToByteArray(), payload...))
 }

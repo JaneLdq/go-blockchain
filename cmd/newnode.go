@@ -26,8 +26,8 @@ var port uint
 // newnodeCmd represents the newnode command
 var newnodeCmd = &cobra.Command{
 	Use:   "newnode",
-	Short: "Create a new node with given port",
-	Long:  `Create a new node with given port`,
+	Short: "Create a new node with given port, the port number will also be used as node id",
+	Long:  `Create a new node with given port, the port number will also be used as node id`,
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Printf("newnode called with args (port = %d)\n", port)
 		cli.newNode(port)
