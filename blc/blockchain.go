@@ -93,7 +93,6 @@ func (blc *Blockchain) MineNewBlock(from string, to string, amount string) {
 		}
 		return nil
 	})
-
 }
 
 //return all the unspent transactions
@@ -356,39 +355,41 @@ func PrintChain(nodeId uint) {
 
 	for {
 		block := bci.Next()
-
-		fmt.Printf("Block: %x\n", block.Header.Hash)
-		fmt.Printf("Height: %d\n", block.Header.Height)
-		fmt.Printf("Nonce: %d\n", block.Header.Nonce)
-		fmt.Printf("PrevBlock: %x\n", block.Header.PrevBlockHash)
-		pow := NewPoW(block)
-		fmt.Printf("PoW: %s\n", strconv.FormatBool(pow.Validate()))
-		fmt.Println("Txs: ")
-		for _, tx := range block.Txs {
-			// fmt.Println(tx)
-			fmt.Printf("%x\n", tx.TxHash)
-			fmt.Printf("Vins: \n")
-			for _, in := range tx.Vins {
-				// fmt.Println(in)
-				fmt.Printf("in.Txid: %x\n", in.TxHash)
-				fmt.Printf("n.Vout: %d\n", in.Vout)
-				fmt.Printf("in.PubKey: %s\n", in.ScriptSig)
-			}
-			fmt.Printf("Vouts: \n")
-			for _, out := range tx.Vouts {
-				// fmt.Println(out)
-				fmt.Println(out.Value)
-				fmt.Println(out.ScriptPubKey)
-			}
-		}
-		fmt.Printf("Timestamp: %s\n", time.Unix(block.Header.Timestamp, 0).Format(timeFormat))
-		fmt.Printf("---------------------------------------------------------------------")
-		fmt.Printf("\n\n")
-
+		PrintBlock(block)
 		if len(block.Header.PrevBlockHash) == 0 {
 			break
 		}
 	}
+}
+
+func PrintBlock(block *Block) {
+	fmt.Printf("Block: %x\n", block.Header.Hash)
+	fmt.Printf("Height: %d\n", block.Header.Height)
+	fmt.Printf("Nonce: %d\n", block.Header.Nonce)
+	fmt.Printf("PrevBlock: %x\n", block.Header.PrevBlockHash)
+	pow := NewPoW(block)
+	fmt.Printf("PoW: %s\n", strconv.FormatBool(pow.Validate()))
+	fmt.Println("Txs: ")
+	for _, tx := range block.Txs {
+		// fmt.Println(tx)
+		fmt.Printf("%x\n", tx.TxHash)
+		fmt.Printf("Vins: \n")
+		for _, in := range tx.Vins {
+			// fmt.Println(in)
+			fmt.Printf("in.Txid: %x\n", in.TxHash)
+			fmt.Printf("n.Vout: %d\n", in.Vout)
+			fmt.Printf("in.PubKey: %s\n", in.ScriptSig)
+		}
+		fmt.Printf("Vouts: \n")
+		for _, out := range tx.Vouts {
+			// fmt.Println(out)
+			fmt.Println(out.Value)
+			fmt.Println(out.ScriptPubKey)
+		}
+	}
+	fmt.Printf("Timestamp: %s\n", time.Unix(block.Header.Timestamp, 0).Format(timeFormat))
+	fmt.Printf("---------------------------------------------------------------------")
+	fmt.Printf("\n\n")
 }
 
 func (bc *Blockchain) GetBalance(address string) int64 {
@@ -401,4 +402,81 @@ func (bc *Blockchain) GetBalance(address string) int64 {
 	}
 
 	return amount
+}
+
+func AddNewBlock(nodeId uint, block Block) {
+	blc := NewBlockchainWithGenesis(nodeId)
+	defer blc.DB.Close()
+	blc.DB.Update(func(tx *bolt.Tx) error {
+		b := tx.Bucket([]byte(blockTable))
+		if b != nil {
+			b.Put(block.Header.Hash, block.Serialize())
+			b.Put([]byte("l"), block.Header.Hash)
+			blc.Tip = block.Header.Hash
+		}
+		return nil
+	})
+}
+
+type BlockchainOjbect struct {
+	Blocks []Block
+	Height int
+}
+
+func GetChain(nodeId uint) BlockchainOjbect {
+	bc := NewBlockchainWithGenesis(nodeId)
+	defer bc.DB.Close()
+
+	bci := bc.Iterator()
+
+	obj := &BlockchainOjbect{}
+	height := 0
+	blocks := []Block{}
+
+	for {
+		block := bci.Next()
+		height++
+		blocks = append(blocks, *block)
+		if len(block.Header.PrevBlockHash) == 0 {
+			break
+		}
+	}
+	obj.Height = height
+	obj.Blocks = blocks
+	return *obj
+}
+
+func UpdateChain(nodeId uint, blocks []Block) {
+	dbFile := fmt.Sprintf(dbFile, string(strconv.Itoa(int(nodeId))))
+	db, err := bolt.Open(dbFile, 0600, nil)
+	if err != nil {
+		log.Panic(err)
+	}
+	defer db.Close()
+	// update tip
+	err = db.Update(func(tx *bolt.Tx) error {
+		b := tx.Bucket([]byte(blockTable))
+		err = b.Put([]byte("l"), blocks[0].Header.Hash)
+		if err != nil {
+			log.Panic(err)
+		}
+		return nil
+	})
+	if err != nil {
+		log.Panic(err)
+	}
+	// update blocks
+	for _, block := range blocks {
+		err = db.Update(func(tx *bolt.Tx) error {
+			b := tx.Bucket([]byte(blockTable))
+			err = b.Put(block.Header.Hash, block.Serialize())
+			if err != nil {
+				log.Panic(err)
+			}
+			return nil
+		})
+		if err != nil {
+			log.Panic(err)
+		}
+	}
 }

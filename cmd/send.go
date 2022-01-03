@@ -24,6 +24,7 @@ import (
 var from string
 var to string
 var msg string
+var addr string
 
 // sendCmd represents the send command
 var sendCmd = &cobra.Command{
@@ -32,13 +33,14 @@ var sendCmd = &cobra.Command{
 	Long:  `Send a message from a node to another`,
 	Run: func(cmd *cobra.Command, args []string) {
 		//trigger a trasaction
-		cli.send(from, to, msg, nodeId)
+		cli.mine(addr, from, to, msg)
 		fmt.Println("send called from ", from, " to", to, "message ", msg)
 	},
 }
 
 func init() {
 	rootCmd.AddCommand(sendCmd)
+	sendCmd.Flags().StringVarP(&addr, "address", "a", "", "node ip address")
 	sendCmd.Flags().StringVarP(&from, "from", "f", "", "sender node address")
 	sendCmd.Flags().StringVarP(&to, "to", "t", "", "receiver node address")
 	sendCmd.Flags().StringVarP(&msg, "message", "m", "", "message")

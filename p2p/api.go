@@ -1,12 +1,11 @@
 package p2p
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
-	"math/rand"
 	"net"
 	"os"
-	"time"
 )
 
 var nodeIPAddress string
@@ -24,11 +23,7 @@ func StartNode(nodeId uint) {
 	if err != nil {
 		log.Fatalln(fmt.Sprintf("Node %d not found.", nodeId))
 	}
-	// mimic a blockchain with height N
-	s1 := rand.NewSource(time.Now().UnixNano())
-	r1 := rand.New(s1)
-	node.Height = uint(r1.Intn(10))
-	fmt.Printf("[API] start node %d, whose blockchain height is %d\n", nodeId, node.Height)
+	fmt.Printf("[API] start node %d, whose blockchain height is %d\n", nodeId, node.getHeight())
 
 	nodeIPAddress = fmt.Sprintf("localhost:%d", nodeId)
 	ln, err := net.Listen(PROTOCOL, nodeIPAddress)
@@ -80,7 +75,21 @@ func ConnectNode(from string, to string) {
 	sendData(from, request)
 }
 
-// nodeAddr is the IP address
-func Mine(nodeAddr string) {
-	sendData(nodeAddr, MINE.ToByteArray())
+type SendMessage struct {
+	From   string
+	To     string
+	Amount string
+}
+
+func Mine(nodeIpAddr string, from string, to string, amount string) {
+	msg := &SendMessage{
+		From: from,
+		To: to,
+		Amount: amount,
+	}
+	payload, err := json.Marshal(msg)
+	if err != nil {
+		log.Fatal(err)
+	}
+	sendData(nodeIpAddr, append(MINE.ToByteArray(), payload...))
 }
