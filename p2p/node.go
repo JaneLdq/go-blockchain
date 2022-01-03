@@ -38,7 +38,13 @@ func (node *Node) isBlockValid(block blc.Block) bool {
 	bci := bc.Iterator()
 	tip := bci.Next().Header.Hash
 	res := bytes.Compare(tip, block.Header.PrevBlockHash)
-	return res == 0
+
+	if res != 0 {
+		return false
+	}
+
+	pow := blc.NewPoW(&block)
+	return pow.Validate()
 }
 
 func (node *Node) addPeer(newPeer string) {

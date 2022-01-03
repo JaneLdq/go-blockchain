@@ -139,7 +139,7 @@ func (node *Node) handleUpdateChain(request []byte) {
 	json.Unmarshal(msg.Content, &chain)
 
 	if chain.Height > node.getHeight() {
-		fmt.Printf("[HANDLER] Replace with longer chain (Height: %d).", chain.Height)
+		fmt.Printf("[HANDLER] Replace with longer chain (Height: %d).\n", chain.Height)
 		blc.UpdateChain(node.Port, chain.Blocks)
 		node.broadcastChain(msg.From, []byte(msg.Content))
 	} else {

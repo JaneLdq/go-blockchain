@@ -17,7 +17,6 @@ var node Node
  * and also registered in each other's known peer for further data sync actions
  */
 func StartNode(nodeId uint) {
-	// TODO start node and set its local blockchain properties from db
 	node = Node{}
 	err := node.loadFromFile(nodeId)
 	if err != nil {
