@@ -24,6 +24,10 @@ type BlockHeader struct {
 // NewBlock creates and returns Block
 func NewBlock(txs []*Transaction, prevBlockHash []byte, height int) *Block {
 	blockHeader := &BlockHeader{time.Now().Unix(), prevBlockHash, []byte{}, 0, height}
+	if height == 1 {
+		dt, _ := time.Parse(timeFormat, "2022-01-01 00:00:00")
+		blockHeader = &BlockHeader{dt.Unix(), prevBlockHash, []byte{}, 0, height}
+	}
 	block := &Block{blockHeader, txs}
 	pow := NewPoW(block)
 	nonce, hash := pow.Run()

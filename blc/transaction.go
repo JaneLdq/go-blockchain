@@ -2,9 +2,11 @@ package blc
 
 import (
 	"bytes"
+	"crypto/rand"
 	"crypto/sha256"
 	"encoding/gob"
 	"encoding/hex"
+	"fmt"
 	"log"
 )
 
@@ -44,11 +46,26 @@ func NewTXOutput(value int, address string) *TXOutput {
 }
 
 // NewCoinbaseTX creates a new coinbase transaction
-func NewCoinbaseTX(to string) *Transaction {
+func NewCoinbaseTX(to, data string) *Transaction {
 
-	txin := TXInput{[]byte{}, -1, "Genesis Block"}
+	if data == "" {
+		randData := make([]byte, 20)
+		_, err := rand.Read(randData)
+		if err != nil {
+			log.Panic(err)
+		}
+
+		data = fmt.Sprintf("%x", randData)
+	}
+
+	txin := TXInput{[]byte{}, -1, data}
 	txout := NewTXOutput(10, to)
 	txCoinbase := &Transaction{nil, []TXInput{txin}, []TXOutput{*txout}}
+
+	if data == "Genesis Block" {
+		txCoinbase.TxHash = []byte{}
+		return txCoinbase
+	}
 	txCoinbase.TransactionHash()
 
 	return txCoinbase

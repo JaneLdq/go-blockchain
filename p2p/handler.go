@@ -85,7 +85,6 @@ func (node *Node) handleHello(request []byte) {
 	}
 }
 
-
 func (node *Node) handleMine(request []byte) {
 	payload := getPayload(request)
 	fmt.Printf(logTemp, MINE.String(), payload)
@@ -96,7 +95,7 @@ func (node *Node) handleMine(request []byte) {
 	bc := blc.NewBlockchainWithGenesis(node.Port)
 	defer bc.DB.Close()
 
-	bc.MineNewBlock(msg.From, msg.To, msg.Amount)
+	bc.MineNewBlock(msg.From, msg.To, msg.Amount, node.Address)
 	block := bc.Iterator().Next()
 	node.broadcastNewBlock(nodeIPAddress, block.Serialize())
 }
@@ -126,7 +125,6 @@ func (node *Node) handleReqChain(request []byte) {
 	peer := string(payload)
 	node.sendChain(peer)
 }
-
 
 func (node *Node) handleUpdateChain(request []byte) {
 	payload := getPayload(request)

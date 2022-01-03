@@ -47,7 +47,7 @@ func (i *BlockchainIterator) Next() *Block {
 	return block
 }
 
-func (blc *Blockchain) MineNewBlock(from string, to string, amount string) {
+func (blc *Blockchain) MineNewBlock(from string, to string, amount string, address string) {
 
 	fromArray := JSONToArray(from)
 	toArray := JSONToArray(to)
@@ -59,13 +59,16 @@ func (blc *Blockchain) MineNewBlock(from string, to string, amount string) {
 
 	var txs []*Transaction
 
-	for index, address := range fromArray {
+	for index, fromAddr := range fromArray {
 
 		value, _ := strconv.Atoi(amountArray[index])
-		tx := NewSimpleTransaction(address, toArray[index], value, blc, txs)
+		tx := NewSimpleTransaction(fromAddr, toArray[index], value, blc, txs)
 		txs = append(txs, tx)
 
 	}
+
+	coinbaseTX := NewCoinbaseTX(address, "")
+	txs = append(txs, coinbaseTX)
 
 	var block *Block
 	blc.DB.View(func(tx *bolt.Tx) error {
@@ -264,7 +267,7 @@ func CreateBlockchain(address string, nodeID uint) *Blockchain {
 
 	var tip []byte
 
-	coinbaseTX := NewCoinbaseTX(address)
+	coinbaseTX := NewCoinbaseTX(address, "Genesis Block")
 	genesis := NewGenesisBlock(coinbaseTX)
 
 	db, err := bolt.Open(dbFile, 0600, nil)
