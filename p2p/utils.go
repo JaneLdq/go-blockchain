@@ -12,6 +12,7 @@ func sendData(addr string, data []byte) error {
 	conn, err := net.Dial(PROTOCOL, addr)
 	if err != nil {
 		fmt.Printf("%s is not available\n", addr)
+		log.Println(err)
 		return err
 	}
 	defer conn.Close()

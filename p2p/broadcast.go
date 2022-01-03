@@ -32,7 +32,6 @@ func (node *Node) broadcastNewBlock(prev string, block []byte) {
 }
 
 func (node *Node) broadcastChain(prev string, payload []byte) {
-	// TODO braodcast longest chain in the net
 	msg := &BroadcastMessage{
 		Type:    CHAIN,
 		Content: payload,

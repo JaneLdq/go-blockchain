@@ -6,5 +6,5 @@ const (
 	ADDR_CHECKSUM_LEN = 4
 
 	// Net Protocal
-	PROTOCOL = "tcp"
+	PROTOCOL = "tcp4"
 )
