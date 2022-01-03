@@ -22,5 +22,7 @@ var getbalanceCmd = &cobra.Command{
 func init() {
 	rootCmd.AddCommand(getbalanceCmd)
 	getbalanceCmd.Flags().StringVarP(&address, "address", "a", "", "address")
+	getbalanceCmd.Flags().UintVarP(&nodeId, "node", "n", 0, "node id")
 	getbalanceCmd.MarkFlagRequired("address")
+	getbalanceCmd.MarkFlagRequired("node")
 }

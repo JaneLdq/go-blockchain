@@ -83,8 +83,8 @@ type SendMessage struct {
 
 func Mine(nodeIpAddr string, from string, to string, amount string) {
 	msg := &SendMessage{
-		From: from,
-		To: to,
+		From:   from,
+		To:     to,
 		Amount: amount,
 	}
 	payload, err := json.Marshal(msg)
