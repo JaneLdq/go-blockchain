@@ -391,6 +391,7 @@ func PrintBlock(block *Block) {
 		}
 	}
 	fmt.Printf("Timestamp: %s\n", time.Unix(block.Header.Timestamp, 0).Format(timeFormat))
+	fmt.Printf("MerkleRoot: %x\n", block.Header.MerkelRoot)
 	fmt.Printf("---------------------------------------------------------------------")
 	fmt.Printf("\n\n")
 }

@@ -6,6 +6,8 @@ import (
 	"crypto/sha256"
 	"encoding/gob"
 	"encoding/hex"
+	"go-blockchain/merkle"
+	"reflect"
 	"fmt"
 	"log"
 )
@@ -127,4 +129,12 @@ func NewSimpleTransaction(from string, to string, amount int, blc *Blockchain, t
 
 func (tx *Transaction) IsCoinbaseTransaction() bool {
 	return len(tx.Vins[0].TxHash) == 0 && tx.Vins[0].Vout == -1
+}
+
+func (tx Transaction) CalculateHash() ([]byte, error) {  
+	return tx.TxHash, nil
+}
+
+func (tx Transaction) Equals(other merkle.Content) (bool, error) {
+	return reflect.DeepEqual(tx, other), nil	
 }
