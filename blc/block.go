@@ -24,6 +24,10 @@ type BlockHeader struct {
 // NewBlock creates and returns Block
 func NewBlock(txs []*Transaction, prevBlockHash []byte, height int) *Block {
 	blockHeader := &BlockHeader{time.Now().Unix(), prevBlockHash, []byte{}, 0, height}
+	if height == 1 {
+		dt, _ := time.Parse(timeFormat, "2022-01-01 00:00:00")
+		blockHeader = &BlockHeader{dt.Unix(), prevBlockHash, []byte{}, 0, height}
+	}
 	block := &Block{blockHeader, txs}
 	pow := NewPoW(block)
 	nonce, hash := pow.Run()
@@ -36,7 +40,7 @@ func NewBlock(txs []*Transaction, prevBlockHash []byte, height int) *Block {
 
 // NewGenesisBlock creates and returns genesis Block
 func NewGenesisBlock(coinbase *Transaction) *Block {
-	return NewBlock([]*Transaction{coinbase}, []byte{}, 0)
+	return NewBlock([]*Transaction{coinbase}, []byte{}, 1)
 }
 
 // serializes the block

@@ -1,12 +1,11 @@
 package p2p
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
-	"math/rand"
 	"net"
 	"os"
-	"time"
 )
 
 var nodeIPAddress string
@@ -18,22 +17,18 @@ var node Node
  * and also registered in each other's known peer for further data sync actions
  */
 func StartNode(nodeId uint) {
-	// TODO start node and set its local blockchain properties from db
 	node = Node{}
 	err := node.loadFromFile(nodeId)
 	if err != nil {
 		log.Fatalln(fmt.Sprintf("Node %d not found.", nodeId))
 	}
-	// mimic a blockchain with height N
-	s1 := rand.NewSource(time.Now().UnixNano())
-	r1 := rand.New(s1)
-	node.Height = uint(r1.Intn(10))
-	fmt.Printf("[API] start node %d, whose blockchain height is %d\n", nodeId, node.Height)
+	nodeIPAddress = buildNodeIPAddress(nodeId)
+	fmt.Printf("[API] start node %d listening at %s, current blockchain height: %d\n", nodeId, nodeIPAddress, node.getHeight())
 
-	nodeIPAddress = fmt.Sprintf("localhost:%d", nodeId)
 	ln, err := net.Listen(PROTOCOL, nodeIPAddress)
 	if err != nil {
-		log.Fatalln(fmt.Sprintf("Node %d failed to start.", nodeId))
+		log.Println(fmt.Sprintf("Node %d failed to start.", nodeId))
+		log.Fatalln(err)
 	}
 	defer ln.Close()
 
@@ -76,12 +71,28 @@ func GetAddress(nodeId uint) string {
 
 // from and to are both IP address, e.g, localhost:3000
 func ConnectNode(from string, to string) {
-	request := append(commandToBytes("connect"), to...)
+	request := append(CONNECT.ToByteArray(), to...)
 	sendData(from, request)
 }
 
-// nodeAddr is the IP address
-func Mine(nodeAddr string) {
-	request := commandToBytes("mine")
-	sendData(nodeAddr, request)
+type SendMessage struct {
+	From    string
+	To      string
+	Amount  string
+	Address string
+}
+
+func Mine(from string, to string, amount string, address string, nodeId uint) {
+	msg := &SendMessage{
+		From:    from,
+		To:      to,
+		Amount:  amount,
+		Address: address,
+	}
+	payload, err := json.Marshal(msg)
+	if err != nil {
+		log.Fatal(err)
+	}
+	nodeIPAddress := buildNodeIPAddress(nodeId)
+	sendData(nodeIPAddress, append(MINE.ToByteArray(), payload...))
 }

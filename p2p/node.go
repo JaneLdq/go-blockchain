@@ -1,6 +1,8 @@
 package p2p
 
 import (
+	blc "go-blockchain/blc"
+
 	"bytes"
 	"crypto/ecdsa"
 	"crypto/elliptic"
@@ -19,19 +21,30 @@ type Node struct {
 	PrivateKey ecdsa.PrivateKey
 	Publickey  []byte
 	peers      []string // known peers
-	Height     uint     // current chain height
 }
 
-// TODO just for test
-var blocks []string
+func (node *Node) getHeight() int {
+	bc := blc.NewBlockchainWithGenesis(node.Port)
+	defer bc.DB.Close()
 
-func (node *Node) isBlockExisted(newBlock []byte) bool {
-	for _, block := range blocks {
-		if block == string(newBlock) {
-			return true
-		}
+	bci := bc.Iterator()
+	return bci.Next().Header.Height
+}
+
+func (node *Node) isBlockValid(block blc.Block) bool {
+	bc := blc.NewBlockchainWithGenesis(node.Port)
+	defer bc.DB.Close()
+
+	bci := bc.Iterator()
+	tip := bci.Next().Header.Hash
+	res := bytes.Compare(tip, block.Header.PrevBlockHash)
+
+	if res != 0 {
+		return false
 	}
-	return false
+
+	pow := blc.NewPoW(&block)
+	return pow.Validate()
 }
 
 func (node *Node) addPeer(newPeer string) {

@@ -23,7 +23,8 @@ import (
 
 var from string
 var to string
-var msg string
+var amount string
+var addr string
 
 // sendCmd represents the send command
 var sendCmd = &cobra.Command{
@@ -31,8 +32,10 @@ var sendCmd = &cobra.Command{
 	Short: "Send a message from a node to another",
 	Long:  `Send a message from a node to another`,
 	Run: func(cmd *cobra.Command, args []string) {
-		// TODO trigger a trasaction
-		fmt.Println("send called from ", from, " to", to, "message ", msg)
+		//trigger a trasaction
+		fmt.Printf("send called with args (from = %s, to = %s, amount = %s, address = %s, node = %d",
+			from, to, amount, addr, nodeId)
+		cli.send(from, to, amount, addr, nodeId)
 	},
 }
 
@@ -40,5 +43,12 @@ func init() {
 	rootCmd.AddCommand(sendCmd)
 	sendCmd.Flags().StringVarP(&from, "from", "f", "", "sender node address")
 	sendCmd.Flags().StringVarP(&to, "to", "t", "", "receiver node address")
-	sendCmd.Flags().StringVarP(&msg, "message", "m", "", "message")
+	sendCmd.Flags().StringVarP(&amount, "amount", "m", "", "amount")
+	sendCmd.Flags().StringVarP(&addr, "address", "a", "", "node's base58 address")
+	sendCmd.Flags().UintVarP(&nodeId, "node", "n", 0, "node id")
+	sendCmd.MarkFlagRequired("node")
+	sendCmd.MarkFlagRequired("address")
+	sendCmd.MarkFlagRequired("from")
+	sendCmd.MarkFlagRequired("to")
+	sendCmd.MarkFlagRequired("amount")
 }
