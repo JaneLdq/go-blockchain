@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"crypto/sha256"
 	"encoding/gob"
+	"go-blockchain/merkle"
 	"log"
 	"time"
 )
@@ -19,19 +20,32 @@ type BlockHeader struct {
 	Hash          []byte
 	Nonce         int
 	Height        int
+	MerkelRoot    []byte
 }
 
 // NewBlock creates and returns Block
 func NewBlock(txs []*Transaction, prevBlockHash []byte, height int) *Block {
-	blockHeader := &BlockHeader{time.Now().Unix(), prevBlockHash, []byte{}, 0, height}
+	blockHeader := &BlockHeader{time.Now().Unix(), prevBlockHash, []byte{}, 0, height, []byte{}}
 	if height == 1 {
 		dt, _ := time.Parse(timeFormat, "2022-01-01 00:00:00")
-		blockHeader = &BlockHeader{dt.Unix(), prevBlockHash, []byte{}, 0, height}
+		blockHeader = &BlockHeader{dt.Unix(), prevBlockHash, []byte{}, 0, height, []byte{}}
 	}
 	block := &Block{blockHeader, txs}
 	pow := NewPoW(block)
 	nonce, hash := pow.Run()
 
+	var list []merkle.Content
+	for _, tx := range txs {
+		if len(tx.TxHash) != 0 {
+			list = append(list, *tx)
+		}
+	}
+	if len(list) > 0 {
+		t, _ := merkle.NewTree(list)
+		mr := t.MerkleRoot()
+		block.Header.MerkelRoot = mr
+	}
+	
 	block.Header.Hash = hash[:]
 	block.Header.Nonce = nonce
 

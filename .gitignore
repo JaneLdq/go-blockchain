@@ -16,3 +16,4 @@ vendor/
 
 *.dat
 *.db
+blockchain_db
